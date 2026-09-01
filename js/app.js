@@ -30,6 +30,78 @@ const App = {
         document.addEventListener('xlsxLoadFailed', () => {
             console.error('[App] XLSX library failed to load from both local and CDN');
         });
+
+        // Handle share target (when app receives shared content from other apps)
+        this.handleShareTarget();
+    },
+
+    /* ---------------- Share Target Handler ---------------- */
+    handleShareTarget() {
+        // Method 1: Modern Web Share Target API (for PWA share target)
+        // The web app receives a POST request with shared data when launched via share
+
+        // For GET-based share target, we read URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+
+        // Check for share target params (sent via GET when no files)
+        const sharedTitle = urlParams.get('title') || urlParams.get('sharedTitle');
+        const sharedText = urlParams.get('text') || urlParams.get('sharedText');
+        const sharedUrl = urlParams.get('url') || urlParams.get('sharedUrl');
+
+        if (action === 'add' || (sharedTitle || sharedText)) {
+            // Wait for app to be ready, then open add page with pre-filled data
+            const setupShareData = () => {
+                if (sharedTitle || sharedText) {
+                    setTimeout(() => {
+                        // Open add transaction page
+                        this.editingTxId = null;
+                        this.currentTxType = 'expense';
+                        this.openAddPage();
+
+                        // Pre-fill note with shared text
+                        const noteField = document.getElementById('txNote');
+                        if (noteField && (sharedText || sharedTitle)) {
+                            noteField.value = [sharedTitle, sharedText].filter(Boolean).join(' - ');
+                        }
+
+                        // Show toast
+                        this.toast(
+                            I18n.current === 'id'
+                                ? 'Data dari share diterima'
+                                : 'Shared data received',
+                            'success'
+                        );
+                    }, 1200); // Wait for splash to finish
+                }
+            };
+
+            // Hook into bootApp
+            const originalBoot = this.bootApp.bind(this);
+            this.bootApp = () => {
+                originalBoot();
+                setupShareData();
+            };
+        }
+
+        // Method 2: Listen for launchQueue events (newer API)
+        if ('launchQueue' in window) {
+            window.launchQueue.setConsumer((launchParams) => {
+                if (launchParams.files && launchParams.files.length > 0) {
+                    const file = launchParams.files[0];
+                    console.log('[Share Target] Received file:', file.name, file.type);
+                    // For now, just notify user
+                    setTimeout(() => {
+                        this.toast(
+                            I18n.current === 'id'
+                                ? `File diterima: ${file.name}`
+                                : `File received: ${file.name}`,
+                            'success'
+                        );
+                    }, 1500);
+                }
+            });
+        }
     },
 
     bootApp() {
