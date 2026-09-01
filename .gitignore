@@ -30,6 +30,7 @@ test-*.js
 # Icon generator scripts (not needed in production)
 icons/generate.js
 icons/generate-icons.html
+icons/generate-screenshots.js
 
 # Local config
 .env
