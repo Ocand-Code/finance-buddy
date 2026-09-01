@@ -1,0 +1,40 @@
+# ============================================
+# Finance Buddy .gitignore
+# ============================================
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (for testing only - not used in production)
+node_modules/
+package.json
+package-lock.json
+
+# Test files
+test-*.html
+test-*.js
+
+# Icon generator scripts (not needed in production)
+icons/generate.js
+icons/generate-icons.html
+
+# Local config
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.bak

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#18181B">
+    <meta name="description" content="Finance Buddy - Catatan keuangan minimalis untuk semua kalangan">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Finance Buddy">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>Finance Buddy</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="splash-mark">
+                <svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="12" y="8" width="32" height="40" rx="3"/>
+                    <path d="M18 18h20M18 24h20M18 30h12"/>
+                    <path d="M34 36l4 4 6-6"/>
+                </svg>
+            </div>
+            <h1 class="splash-title">Finance Buddy</h1>
+            <p class="splash-subtitle" data-i18n="splash_subtitle">Catatan keuangan pribadi</p>
+        </div>
+    </div>
+
+    <!-- Login / Auth Screen -->
+    <div id="authScreen" class="screen auth-screen hidden">
+        <div class="auth-container">
+            <div class="auth-hero">
+                <div class="auth-mark">
+                    <svg width="64" height="64" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="12" y="8" width="32" height="40" rx="3"/>
+                        <path d="M18 18h20M18 24h20M18 30h12"/>
+                        <path d="M34 36l4 4 6-6"/>
+                    </svg>
+                </div>
+                <h1 class="auth-title" data-i18n="auth_welcome">Selamat Datang</h1>
+                <p class="auth-subtitle" data-i18n="auth_subtitle">Masuk untuk mulai mencatat keuangan Anda.</p>
+            </div>
+
+            <form id="authForm" class="auth-form">
+                <div class="field">
+                    <label for="authName" data-i18n="auth_name">Nama</label>
+                    <input type="text" id="authName" required placeholder="Nama Anda" maxlength="24" autocomplete="name">
+                </div>
+                <div class="field">
+                    <label for="authEmail" data-i18n="auth_email">Email</label>
+                    <input type="email" id="authEmail" required placeholder="nama@email.com" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label for="authPin" data-i18n="auth_pin">PIN (4 digit)</label>
+                    <input type="password" id="authPin" required placeholder="••••" minlength="4" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" autocomplete="off">
+                    <p class="field-hint" data-i18n="auth_pin_hint">PIN untuk melindungi data Anda di perangkat ini</p>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span data-i18n="auth_enter">Lanjutkan</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span data-i18n="auth_hint">Data tersimpan aman di perangkat Anda</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <button id="menuBtn" class="icon-btn" aria-label="Menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </button>
+            <div class="header-title">
+                <span class="header-title-main" id="headerPageTitle" data-i18n="nav_dashboard">Dashboard</span>
+            </div>
+            <div class="header-actions">
+                <button id="langBtn" class="icon-btn" aria-label="Language">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-email" id="userEmail">user@email.com</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span data-i18n="nav_dashboard">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="transactions">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    <span data-i18n="nav_transactions">Transaksi</span>
+                </a>
+                <a href="#" class="nav-item nav-item-primary" data-page="add">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <span data-i18n="nav_add">Tambah</span>
+                </a>
+                <a href="#" class="nav-item" data-page="reports">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+                    <span data-i18n="nav_reports">Laporan</span>
+                </a>
+                <a href="#" class="nav-item" data-page="categories">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><path d="M7 7h.01"/></svg>
+                    <span data-i18n="nav_categories">Kategori</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span data-i18n="nav_settings">Pengaturan</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="nav-item nav-item-logout">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <span data-i18n="logout">Keluar</span>
+                </button>
+            </div>
+        </aside>
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Dashboard Page -->
+            <section id="page-dashboard" class="page active">
+                <div class="page-greeting">
+                    <h2 class="greeting-text" id="greetingText">Selamat datang</h2>
+                    <p class="greeting-sub" id="greetingSubtitle">Berikut ringkasan keuangan Anda</p>
+                </div>
+
+                <!-- Balance Card -->
+                <div class="balance-card">
+                    <div class="balance-header">
+                        <span class="balance-label" data-i18n="dash_balance">Saldo Saat Ini</span>
+                        <button class="balance-toggle" id="balanceToggle" aria-label="Toggle visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div class="balance-amount" id="balanceAmount">Rp 0</div>
+                    <div class="balance-meta">
+                        <div class="meta-item">
+                            <div class="meta-icon meta-icon-income">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                            </div>
+                            <div>
+                                <div class="meta-label" data-i18n="dash_income">Pemasukan</div>
+                                <div class="meta-value" id="monthIncome">Rp 0</div>
+                            </div>
+                        </div>
+                        <div class="meta-divider"></div>
+                        <div class="meta-item">
+                            <div class="meta-icon meta-icon-expense">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                            </div>
+                            <div>
+                                <div class="meta-label" data-i18n="dash_expense">Pengeluaran</div>
+                                <div class="meta-value" id="monthExpense">Rp 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="quick-btn quick-btn-income" data-action="add-income">
+                        <div class="quick-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                        </div>
+                        <span data-i18n="quick_income">Pemasukan</span>
+                    </button>
+                    <button class="quick-btn quick-btn-expense" data-action="add-expense">
+                        <div class="quick-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                        </div>
+                        <span data-i18n="quick_expense">Pengeluaran</span>
+                    </button>
+                </div>
+
+                <!-- Chart Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" data-i18n="dash_chart_title">7 Hari Terakhir</h3>
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-dot legend-dot-income"></span><span data-i18n="dash_income">Pemasukan</span></span>
+                            <span class="legend-item"><span class="legend-dot legend-dot-expense"></span><span data-i18n="dash_expense">Pengeluaran</span></span>
+                        </div>
+                    </div>
+                    <canvas id="weeklyChart" height="180"></canvas>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" data-i18n="dash_recent">Transaksi Terbaru</h3>
+                        <button class="link-button" data-page="transactions">
+                            <span data-i18n="dash_view_all">Lihat semua</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                    </div>
+                    <div id="recentTransactions" class="transaction-list"></div>
+                </div>
+            </section>
+
+            <!-- Transactions Page -->
+            <section id="page-transactions" class="page">
+                <div class="page-toolbar">
+                    <div class="search-box">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="search" id="searchInput" placeholder="Cari transaksi..." data-i18n-placeholder="search_placeholder">
+                    </div>
+                    <div class="filter-tabs">
+                        <button class="tab active" data-filter="all" data-i18n="filter_all">Semua</button>
+                        <button class="tab" data-filter="income" data-i18n="filter_income">Masuk</button>
+                        <button class="tab" data-filter="expense" data-i18n="filter_expense">Keluar</button>
+                    </div>
+                </div>
+
+                <div id="transactionsList" class="transaction-list"></div>
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-illustration">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                            <circle cx="40" cy="40" r="36" fill="currentColor" opacity="0.08"/>
+                            <path d="M28 32h24M28 40h24M28 48h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title" data-i18n="empty_transactions">Belum ada transaksi</h3>
+                    <p class="empty-text" data-i18n="empty_text">Mulai catat transaksi pertama Anda</p>
+                    <button class="btn btn-primary" data-action="add" data-page="add">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                        <span data-i18n="empty_add">Tambah Sekarang</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Add/Edit Transaction Page -->
+            <section id="page-add" class="page">
+                <form id="transactionForm" class="transaction-form">
+                    <input type="hidden" id="txId">
+
+                    <div class="segmented-control">
+                        <button type="button" class="segment-btn active" data-type="expense">
+                            <span data-i18n="type_expense">Pengeluaran</span>
+                        </button>
+                        <button type="button" class="segment-btn" data-type="income">
+                            <span data-i18n="type_income">Pemasukan</span>
+                        </button>
+                    </div>
+
+                    <div class="amount-input-wrap">
+                        <span class="currency-symbol" id="formCurrency">Rp</span>
+                        <input type="number" id="txAmount" required placeholder="0" min="1" step="any" inputmode="decimal">
+                    </div>
+
+                    <div class="field">
+                        <label data-i18n="form_category">Kategori</label>
+                        <div id="categoryPicker" class="category-grid"></div>
+                        <input type="hidden" id="txCategory" required>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="txDate" data-i18n="form_date">Tanggal</label>
+                            <input type="date" id="txDate" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="txNote" data-i18n="form_note">Catatan (opsional)</label>
+                        <input type="text" id="txNote" maxlength="120" placeholder="Misal: makan siang">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn" data-i18n="cancel">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <span data-i18n="save">Simpan</span>
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn btn-danger-text hidden" id="deleteBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span data-i18n="delete_transaction">Hapus Transaksi</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Categories Page -->
+            <section id="page-categories" class="page">
+                <div class="card">
+                    <h3 class="card-title" data-i18n="cat_expense_title">Kategori Pengeluaran</h3>
+                    <div id="expenseCategories" class="category-grid-display"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" data-i18n="cat_income_title">Kategori Pemasukan</h3>
+                    <div id="incomeCategories" class="category-grid-display"></div>
+                </div>
+
+                <button class="btn btn-primary btn-block" id="addCategoryBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <span data-i18n="cat_add">Tambah Kategori</span>
+                </button>
+            </section>
+
+            <!-- Reports Page -->
+            <section id="page-reports" class="page">
+                <div class="month-selector">
+                    <button class="month-nav" id="prevMonth" aria-label="Previous month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div class="month-label" id="currentMonthLabel">-</div>
+                    <button class="month-nav" id="nextMonth" aria-label="Next month">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" data-i18n="report_category">Pengeluaran per Kategori</h3>
+                    <div class="chart-wrap">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" data-i18n="report_breakdown">Rincian</h3>
+                    <div id="categoryBreakdown" class="breakdown-list"></div>
+                </div>
+            </section>
+
+            <!-- Settings Page -->
+            <section id="page-settings" class="page">
+                <div class="settings-group">
+                    <h3 class="settings-group-title" data-i18n="settings_appearance">Tampilan</h3>
+                    <div class="settings-card">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_theme">Mode Gelap</div>
+                                <div class="setting-desc" data-i18n="settings_theme_desc">Nyaman untuk mata di malam hari</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="darkModeToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_lang">Bahasa</div>
+                                <div class="setting-desc" data-i18n="settings_lang_desc">Pilih bahasa antarmuka</div>
+                            </div>
+                            <select id="langSelect" class="select-compact">
+                                <option value="id">Indonesia</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title" data-i18n="settings_data">Data</h3>
+                    <div class="settings-card">
+                        <button class="setting-item setting-item-button" id="exportExcelBtn">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_export_excel">Ekspor ke Excel</div>
+                                <div class="setting-desc" data-i18n="settings_export_excel_desc">Pilih rentang tanggal dan unduh file .xlsx</div>
+                            </div>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13l3 3 5-5"/></svg>
+                        </button>
+                        <button class="setting-item setting-item-button" id="exportBtn">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_export">Ekspor JSON</div>
+                                <div class="setting-desc" data-i18n="settings_export_desc">Cadangkan semua data sebagai file JSON</div>
+                            </div>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </button>
+                        <button class="setting-item setting-item-button" id="importBtn">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_import">Impor Data</div>
+                                <div class="setting-desc" data-i18n="settings_import_desc">Pulihkan dari file JSON</div>
+                            </div>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        </button>
+                        <input type="file" id="importFile" accept=".json" hidden>
+                        <button class="setting-item setting-item-button setting-item-danger" id="clearBtn">
+                            <div class="setting-info">
+                                <div class="setting-label" data-i18n="settings_clear">Hapus Semua Data</div>
+                                <div class="setting-desc" data-i18n="settings_clear_desc">Tindakan ini tidak dapat dibatalkan</div>
+                            </div>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title" data-i18n="settings_about">Tentang</h3>
+                    <div class="settings-card settings-about">
+                        <div class="about-app">
+                            <div class="about-mark">FB</div>
+                            <div>
+                                <div class="about-name">Finance Buddy</div>
+                                <div class="about-version">Versi 1.0 · dibuat dengan ❤️</div>
+                            </div>
+                        </div>
+                        <p class="about-desc" data-i18n="settings_about_text">Aplikasi catatan keuangan pribadi yang elegan, mudah digunakan, dan siap menjadi aplikasi Android.</p>
+                    </div>
+                </div>
+
+                <p class="footer-note">
+                    <span data-i18n="footer_note">Aplikasi ini berjalan sepenuhnya di perangkat Anda</span>
+                </p>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="bottom-nav-item active" data-page="dashboard">
+                <svg class="bottom-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                <span data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="transactions">
+                <svg class="bottom-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                <span data-i18n="nav_transactions">Transaksi</span>
+            </a>
+            <a href="#" class="bottom-nav-fab" data-page="add" aria-label="Add transaction">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="reports">
+                <svg class="bottom-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+                <span data-i18n="nav_reports">Laporan</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-page="settings">
+                <svg class="bottom-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span data-i18n="nav_settings">Pengaturan</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal</h3>
+                <button class="modal-close" id="modalClose" aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- SheetJS for Excel export (local, with CDN fallback) -->
+    <script src="js/xlsx.full.min.js"></script>
+    <script>
+        // CDN fallback if local fails
+        if (typeof XLSX === 'undefined') {
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+            s.onerror = function() {
+                console.error('[Excel] Both local and CDN failed to load');
+                document.dispatchEvent(new CustomEvent('xlsxLoadFailed'));
+            };
+            document.head.appendChild(s);
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/excel.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
