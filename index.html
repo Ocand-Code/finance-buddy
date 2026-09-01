@@ -8,9 +8,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Finance Buddy">
-    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#18181B">
     <title>Finance Buddy</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -65,10 +66,7 @@
                 </button>
             </form>
 
-            <div class="auth-footer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span data-i18n="auth_hint">Data tersimpan aman di perangkat Anda</span>
-            </div>
+
         </div>
     </div>
 
@@ -146,9 +144,14 @@
                 <div class="balance-card">
                     <div class="balance-header">
                         <span class="balance-label" data-i18n="dash_balance">Saldo Saat Ini</span>
-                        <button class="balance-toggle" id="balanceToggle" aria-label="Toggle visibility">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
+                        <div class="balance-header-actions">
+                            <button class="icon-btn icon-btn-sm" id="dashExportBtn" aria-label="Export Excel" title="Export Excel">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13l3 3 5-5"/></svg>
+                            </button>
+                            <button class="balance-toggle" id="balanceToggle" aria-label="Toggle visibility">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="balance-amount" id="balanceAmount">Rp 0</div>
                     <div class="balance-meta">
@@ -281,6 +284,18 @@
                     <div class="field">
                         <label for="txNote" data-i18n="form_note">Catatan (opsional)</label>
                         <input type="text" id="txNote" maxlength="120" placeholder="Misal: makan siang">
+                    </div>
+
+                    <div class="field">
+                        <label data-i18n="form_receipt">Struk/Nota (opsional)</label>
+                        <div class="receipt-upload-row">
+                            <button type="button" class="btn btn-secondary" id="receiptUploadBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                <span data-i18n="receipt_upload">Unggah Struk</span>
+                            </button>
+                            <input type="file" id="receiptFile" accept="image/*" hidden>
+                            <div class="receipt-preview" id="receiptPreview"></div>
+                        </div>
                     </div>
 
                     <div class="form-actions">

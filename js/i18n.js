@@ -55,6 +55,10 @@ const TRANSLATIONS = {
         form_category: 'Kategori',
         form_date: 'Tanggal',
         form_note: 'Catatan (opsional)',
+        form_receipt: 'Struk/Nota (opsional)',
+        receipt_upload: 'Unggah Struk',
+        receipt_view: 'Lihat Struk',
+        receipt_remove: 'Hapus Struk',
         cancel: 'Batal',
         save: 'Simpan',
 
@@ -188,6 +192,10 @@ const TRANSLATIONS = {
         form_category: 'Category',
         form_date: 'Date',
         form_note: 'Note (optional)',
+        form_receipt: 'Receipt/Note (optional)',
+        receipt_upload: 'Upload Receipt',
+        receipt_view: 'View Receipt',
+        receipt_remove: 'Remove Receipt',
         cancel: 'Cancel',
         save: 'Save',
 

@@ -143,6 +143,56 @@ const App = {
         document.getElementById('langSelect').value = I18n.current;
     },
 
+    /* ---------------- Receipt Upload ---------------- */
+    initReceiptUpload() {
+        const uploadBtn = document.getElementById('receiptUploadBtn');
+        const fileInput = document.getElementById('receiptFile');
+        const preview = document.getElementById('receiptPreview');
+
+        if (!uploadBtn || !fileInput) return;
+
+        uploadBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                this.toast(I18n.current === 'id' ? 'File harus berupa gambar' : 'File must be an image', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                this.toast(I18n.current === 'id' ? 'Ukuran file maksimal 5MB' : 'Max file size is 5MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                this._currentReceipt = dataUrl;
+                preview.innerHTML = `<img src="${dataUrl}" alt="receipt"><button type="button" class="receipt-remove-btn" id="receiptRemoveBtn" aria-label="Remove receipt">&times;</button>`;
+
+                document.getElementById('receiptRemoveBtn').addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this._currentReceipt = null;
+                    preview.innerHTML = '';
+                    fileInput.value = '';
+                });
+
+                preview.addEventListener('click', () => this.viewReceipt(dataUrl));
+            };
+            reader.readAsDataURL(file);
+        });
+    },
+
+    viewReceipt(dataUrl) {
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `<img src="${dataUrl}" class="receipt-modal-img" alt="Receipt">`;
+        document.getElementById('modalTitle').textContent = I18n.t('receipt_view');
+        this.openModal();
+    },
+
     /* ---------------- Global Events ---------------- */
     bindGlobalEvents() {
         // Auth form
@@ -266,6 +316,12 @@ const App = {
             this.updateBalanceDisplay();
         });
 
+        // Dashboard quick export
+        const dashExportBtn = document.getElementById('dashExportBtn');
+        if (dashExportBtn) {
+            dashExportBtn.addEventListener('click', () => this.showExcelExportModal());
+        }
+
         // Settings
         document.getElementById('darkModeToggle').addEventListener('change', (e) => {
             const s = Storage.getSettings();
@@ -305,6 +361,9 @@ const App = {
 
         // Re-render charts on resize
         window.addEventListener('resize', () => this.refreshCharts());
+
+        // Receipt upload
+        this.initReceiptUpload();
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -467,7 +526,14 @@ const App = {
             : `<div class="empty-state" style="padding:24px"><div class="empty-illustration"><svg width="60" height="60" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="36" fill="currentColor" opacity="0.08"/><path d="M28 32h24M28 40h24M28 48h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/></svg></div><h3 class="empty-title">${I18n.t('empty_transactions')}</h3><p class="empty-text">${I18n.t('empty_text')}</p></div>`;
 
         recentEl.querySelectorAll('.transaction-item').forEach(el => {
-            el.addEventListener('click', () => this.editTransaction(el.getAttribute('data-id')));
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.tx-receipt-thumb')) {
+                    const receiptData = e.target.closest('.tx-receipt-thumb').getAttribute('data-receipt');
+                    this.viewReceipt(receiptData);
+                    return;
+                }
+                this.editTransaction(el.getAttribute('data-id'));
+            });
         });
 
         // Chart
@@ -520,7 +586,14 @@ const App = {
         listEl.innerHTML = txs.map(t => this.txRowHTML(t)).join('');
 
         listEl.querySelectorAll('.transaction-item').forEach(el => {
-            el.addEventListener('click', () => this.editTransaction(el.getAttribute('data-id')));
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.tx-receipt-thumb')) {
+                    const receiptData = e.target.closest('.tx-receipt-thumb').getAttribute('data-receipt');
+                    this.viewReceipt(receiptData);
+                    return;
+                }
+                this.editTransaction(el.getAttribute('data-id'));
+            });
         });
     },
 
@@ -530,6 +603,7 @@ const App = {
         const label = cat ? Categories.getLabel(cat) : I18n.t('tx_no_category');
         const note = tx.note ? ` • ${tx.note}` : '';
         const sign = tx.type === 'income' ? '+' : '−';
+        const receiptThumb = tx.receipt ? `<div class="tx-receipt-thumb" data-receipt="${this._escapeHTML(tx.receipt)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>` : '';
         return `
             <div class="transaction-item" data-id="${tx.id}">
                 <div class="transaction-icon ${tx.type}">${icon}</div>
@@ -537,6 +611,7 @@ const App = {
                     <div class="transaction-title">${this._escapeHTML(label)}${note}</div>
                     <div class="transaction-meta">${I18n.formatDate(tx.date)}</div>
                 </div>
+                ${receiptThumb}
                 <div class="transaction-amount ${tx.type}">${sign} ${I18n.formatMoney(tx.amount)}</div>
             </div>
         `;
@@ -571,6 +646,22 @@ const App = {
                 document.getElementById('txNote').value = tx.note || '';
                 document.getElementById('txCategory').value = tx.categoryId || '';
                 this.currentTxType = tx.type;
+
+                const preview = document.getElementById('receiptPreview');
+                if (tx.receipt) {
+                    this._currentReceipt = tx.receipt;
+                    preview.innerHTML = `<img src="${tx.receipt}" alt="receipt"><button type="button" class="receipt-remove-btn" id="receiptRemoveBtn" aria-label="Remove receipt">&times;</button>`;
+                    document.getElementById('receiptRemoveBtn').addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        this._currentReceipt = null;
+                        preview.innerHTML = '';
+                        document.getElementById('receiptFile').value = '';
+                    });
+                    preview.addEventListener('click', () => this.viewReceipt(tx.receipt));
+                } else {
+                    this._currentReceipt = null;
+                    preview.innerHTML = '';
+                }
             } else {
                 this.editingTxId = null;
                 this.resetForm();
@@ -585,7 +676,6 @@ const App = {
 
         document.getElementById('formCurrency').textContent = I18n.currency.symbol;
         this.renderCategoryPicker();
-        // Show/hide delete button based on edit mode
         const deleteBtn = document.getElementById('deleteBtn');
         if (deleteBtn) {
             deleteBtn.classList.toggle('hidden', !this.editingTxId);
@@ -599,6 +689,11 @@ const App = {
         document.getElementById('txDate').value = new Date().toISOString().slice(0, 10);
         document.getElementById('txNote').value = '';
         document.getElementById('txCategory').value = '';
+        this._currentReceipt = null;
+        const preview = document.getElementById('receiptPreview');
+        if (preview) preview.innerHTML = '';
+        const fileInput = document.getElementById('receiptFile');
+        if (fileInput) fileInput.value = '';
     },
 
     renderCategoryPicker() {
@@ -627,6 +722,7 @@ const App = {
         const categoryId = document.getElementById('txCategory').value;
         const date = document.getElementById('txDate').value;
         const note = document.getElementById('txNote').value.trim();
+        const receipt = this._currentReceipt || null;
 
         if (!amount || amount <= 0) {
             this.toast(I18n.t('toast_amount_invalid'), 'error');
@@ -646,7 +742,8 @@ const App = {
             amount,
             categoryId,
             date,
-            note
+            note,
+            receipt
         };
 
         if (this.editingTxId) {
@@ -659,7 +756,6 @@ const App = {
 
         this.editingTxId = null;
         this.navigate('transactions');
-        // Focus scroll to top
         setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
     },
 
@@ -965,18 +1061,22 @@ const App = {
                     <div class="sheets-list">
                         <div class="sheet-item">
                             <span class="sheet-item-icon">1</span>
-                            <span>${I18n.t('excel_sheet_tx')}</span>
+                            <span>Dashboard — ringkasan visual</span>
                         </div>
                         <div class="sheet-item">
                             <span class="sheet-item-icon">2</span>
-                            <span>${I18n.t('excel_sheet_summary')}</span>
+                            <span>${I18n.t('excel_sheet_tx')}</span>
                         </div>
                         <div class="sheet-item">
                             <span class="sheet-item-icon">3</span>
-                            <span>${I18n.t('excel_sheet_category')}</span>
+                            <span>${I18n.t('excel_sheet_summary')}</span>
                         </div>
                         <div class="sheet-item">
                             <span class="sheet-item-icon">4</span>
+                            <span>${I18n.t('excel_sheet_category')}</span>
+                        </div>
+                        <div class="sheet-item">
+                            <span class="sheet-item-icon">5</span>
                             <span>${I18n.t('excel_sheet_month')}</span>
                         </div>
                     </div>

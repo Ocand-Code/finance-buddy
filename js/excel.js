@@ -27,19 +27,23 @@ const ExcelExport = {
             // Build workbook
             const wb = XLSX.utils.book_new();
 
-            // Sheet 1: Transactions
+            // Sheet 1: Dashboard
+            const wsDashboard = this._buildDashboardSheet(filtered);
+            XLSX.utils.book_append_sheet(wb, wsDashboard, 'Dashboard');
+
+            // Sheet 2: Transactions
             const wsTx = this._buildTransactionsSheet(filtered);
             XLSX.utils.book_append_sheet(wb, wsTx, 'Transactions');
 
-            // Sheet 2: Summary
+            // Sheet 3: Summary
             const wsSummary = this._buildSummarySheet(filtered);
             XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
-            // Sheet 3: By Category
+            // Sheet 4: By Category
             const wsByCat = this._buildByCategorySheet(filtered);
             XLSX.utils.book_append_sheet(wb, wsByCat, 'By Category');
 
-            // Sheet 4: By Month
+            // Sheet 5: By Month
             const wsByMonth = this._buildByMonthSheet(filtered);
             XLSX.utils.book_append_sheet(wb, wsByMonth, 'By Month');
 
@@ -89,6 +93,69 @@ const ExcelExport = {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }, 100);
+    },
+
+    /* ----------------------------------------
+       Build Dashboard sheet
+       ---------------------------------------- */
+    _buildDashboardSheet(transactions) {
+        const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+        const balance = totalIncome - totalExpense;
+        const count = transactions.length;
+
+        const today = new Date();
+        const monthTxs = transactions.filter(t => {
+            const d = new Date(t.date);
+            return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+        });
+        const monthIncome = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const monthExpense = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+        const recent = [...transactions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 5);
+
+        const aoa = [
+            ['DASHBOARD KEUANGAN'],
+            [],
+            ['Ringkasan', 'Nilai'],
+            ['Saldo Keseluruhan', balance],
+            ['Total Pemasukan', totalIncome],
+            ['Total Pengeluaran', totalExpense],
+            ['Jumlah Transaksi', count],
+            [],
+            ['Bulan Ini', 'Nilai'],
+            ['Pemasukan Bulan Ini', monthIncome],
+            ['Pengeluaran Bulan Ini', monthExpense],
+            [],
+            ['Transaksi Terbaru'],
+            ['Tanggal', 'Tipe', 'Kategori', 'Jumlah', 'Catatan']
+        ];
+
+        recent.forEach(tx => {
+            const cat = Categories.getById(tx.categoryId);
+            const catLabel = cat ? Categories.getLabel(cat) : 'Tanpa Kategori';
+            aoa.push([
+                tx.date,
+                tx.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+                catLabel,
+                tx.amount,
+                tx.note || ''
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+        const currencyCells = ['B4', 'B5', 'B6', 'B10', 'B11'];
+        currencyCells.forEach(ref => {
+            if (ws[ref] && typeof ws[ref].v === 'number') {
+                ws[ref].z = '"Rp "#,##0';
+                ws[ref].t = 'n';
+            }
+        });
+
+        ws['!cols'] = [{ wch: 22 }, { wch: 20 }];
+
+        return ws;
     },
 
     /* ----------------------------------------
