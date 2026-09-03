@@ -39,3 +39,4 @@ icons/generate-screenshots.js
 # Temporary files
 *.tmp
 *.bak
+.vercel
